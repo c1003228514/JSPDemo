@@ -54,11 +54,11 @@ public class LoginServlet extends HttpServlet {
 				resp.sendRedirect(resp.encodeRedirectUrl(req.getContextPath()+"/book/success"));
 			}else {
 				//密码不正确
-				resp.sendRedirect(req.getContextPath()+"/jsp/day02/login.jsp?info=1");
+				resp.sendRedirect(req.getContextPath()+"/jsp/day03/login.jsp?info=1");
 			}
 		}else {
 			//用户不存在
-			resp.sendRedirect(req.getContextPath()+"/jsp/day02/login.jsp?info=2");
+			resp.sendRedirect(req.getContextPath()+"/jsp/day03/login.jsp?info=2");
 		}
 	}
 	

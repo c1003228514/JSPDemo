@@ -48,7 +48,7 @@ public class JDBCutil {
 	public Connection getConnection(){
 		
 		try {
-			conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/mysql0506?useUnicode=true&characterEncoding=utf-8&useSSL=false", "root", "1234");
+			conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/mysql0512", "root", "1234");
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

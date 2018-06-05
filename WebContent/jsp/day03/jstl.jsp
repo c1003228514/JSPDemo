@@ -1,12 +1,24 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
-    <%@page import="com.cyt.jsp.entity.*,java.util.*" %>
+    <%@page import="com.cyt.jsp.entity.*,com.cyt.jsp.dao.*,com.cyt.jsp.dao.impl.*,java.util.*" %>
     <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <title>Insert title here</title>
+
+	<style type="text/css">
+		table{
+			width: 500px;
+			text-align: center;
+		}
+		table ,table th ,table td{
+			border: 1px solid #ccc;
+			border-collapse: collapse;
+		}
+	</style>
+
 </head>
 <body>
 	
@@ -54,6 +66,7 @@
 	</c:choose>
 	
 	<hr />
+	
 	<c:forEach var="i" begin="1" end="9">
 		<c:if test="${i%2 == 0 }">
 			<c:forEach var="j" begin="1" end="${i }">
@@ -67,6 +80,40 @@
 		</c:if>
 		<br />
 	</c:forEach>
+	<%
+		IBookDao bd = new BookDaoImpl();
+		List<Book> books = bd.selectBooks();
+		
+		request.setAttribute("books", books);
+	%>
+	<table>
+		<tr>
+			<th>序号</th>
+			<th>ID</th>
+			<th>名称</th>
+			<th>作者</th>
+			<th>价格</th>
+			<th>库存</th>
+		</tr>
+		
+		<c:if test="${not empty books}">
+			<c:forEach var="b" items="${books}" varStatus="vs">
+				<tr>
+					<th>${vs.count }</th>
+					<th>${b.bookId }</th>
+					<th>${b.bookName }</th>
+					<th>${b.author }</th>
+					<th>${b.price }</th>
+					<th>${b.storeCount }</th>
+				</tr>
+			</c:forEach>
+		</c:if>
+		<c:if test="${empty books}">
+			<tr>
+				<td colspan="5">没有数据</td>
+			</tr>
+		</c:if>
+	</table>
 	
 	
 	

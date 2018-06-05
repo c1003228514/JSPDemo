@@ -9,6 +9,7 @@ import java.util.List;
 
 import com.cyt.jsp.dao.IBookDao;
 import com.cyt.jsp.entity.Book;
+import com.cyt.jsp.entity.Pageing;
 import com.cyt.jsp.util.JDBCutil;
 
 public class BookDaoImpl implements IBookDao {
@@ -56,7 +57,7 @@ public class BookDaoImpl implements IBookDao {
 	@Override
 	public void insertBook(Book b) {
 		Connection conn = JDBCutil.getInstance().getConnection();
-		String sql = "insert into JA_BOOK (bookname,author,price,storecount) values (?,?,?,?)";
+		String sql = "insert into JA_BOOK (bookname,author,price,storecount,bookimg) values (?,?,?,?,?)";
 		
 		PreparedStatement pstm = null;
 		
@@ -66,6 +67,7 @@ public class BookDaoImpl implements IBookDao {
 			pstm.setString(2, b.getAuthor());
 			pstm.setDouble(3, b.getPrice());
 			pstm.setInt(4, b.getStoreCount());
+			pstm.setString(5, b.getBookImg());
 			
 			pstm.executeUpdate();
 		} catch (SQLException e) {
@@ -150,4 +152,103 @@ public class BookDaoImpl implements IBookDao {
 			JDBCutil.getInstance().release(null, pstm, conn);
 		}
 	}
+
+	@Override
+	public Pageing selectBooksByCodition(String bname, String minPrice,
+			String maxPrice,int pageNow,int pageSize) {
+		Connection conn = JDBCutil.getInstance().getConnection();
+		String sql = "select * from JA_BOOK where 1=1 ";
+		
+		if (bname != null && !"".equals(bname.trim())) {
+			sql += " and bookName like '%"+bname+"%' ";
+		}
+		if (minPrice != null && !"".equals(minPrice) && (maxPrice == null || "".equals(maxPrice))) {
+			sql += " and price >= "+Double.parseDouble(minPrice);
+		}
+		if (maxPrice != null && !"".equals(maxPrice) && (minPrice == null || "".equals(minPrice))) {
+			sql += " and price <= "+Double.parseDouble(maxPrice);
+		}
+		if (minPrice != null && !"".equals(minPrice) && maxPrice != null && !"".equals(maxPrice)) {
+			sql += " and price between "+Double.parseDouble(minPrice) +" and "+Double.parseDouble(maxPrice);
+		}
+		
+		sql += " limit ?,? ";
+		
+		Pageing p = new Pageing();
+		
+		PreparedStatement pstm = null;
+		ResultSet rs = null;
+		List<Book> books = null;
+		
+		try {
+			pstm = conn.prepareStatement(sql);
+			pstm.setInt(1, (pageNow-1)*pageSize);
+			pstm.setInt(2, pageSize);
+			rs = pstm.executeQuery();
+			books = this.getListBooks(rs);
+			
+			
+			p.setBooks(books);
+			p.setPageNow(pageNow);
+			p.setPageSize(pageSize);
+			
+			int rowCount = (int) this.getRowCount(bname, minPrice, maxPrice);
+			int pageCount = 0;
+			if (rowCount % pageSize == 0) {
+				pageCount = rowCount /pageSize;
+			}else {
+				pageCount = rowCount /pageSize + 1;
+			}
+			p.setPageCount(pageCount);
+			p.setRowCount(rowCount);
+			
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}finally {
+			JDBCutil.getInstance().release(rs, pstm, conn);
+		}
+		return p;
+	}
+	
+	private long getRowCount(String bname, String minPrice,
+			String maxPrice) {
+		Connection conn = JDBCutil.getInstance().getConnection();
+		String sql = "select count(*) from JA_BOOK where 1=1 ";
+		
+		if (bname != null && !"".equals(bname.trim())) {
+			sql += " and bookName like '%"+bname+"%' ";
+		}
+		if (minPrice != null && !"".equals(minPrice) && (maxPrice == null || "".equals(maxPrice))) {
+			sql += " and price >= "+Double.parseDouble(minPrice);
+		}
+		if (maxPrice != null && !"".equals(maxPrice) && (minPrice == null || "".equals(minPrice))) {
+			sql += " and price <= "+Double.parseDouble(maxPrice);
+		}
+		if (minPrice != null && !"".equals(minPrice) && maxPrice != null && !"".equals(maxPrice)) {
+			sql += " and price between "+Double.parseDouble(minPrice) +" and "+Double.parseDouble(maxPrice);
+		}
+		
+		PreparedStatement pstm = null;
+		ResultSet rs = null;
+		
+		try {
+			pstm = conn.prepareStatement(sql);
+			
+			rs = pstm.executeQuery();
+			
+			if (rs.next()) {
+				return rs.getLong(1);
+			}
+			
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}finally {
+			JDBCutil.getInstance().release(rs, pstm, conn);
+		}
+		
+		return 0;
+	}
+	
 }
